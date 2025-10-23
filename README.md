@@ -72,7 +72,23 @@ cd midnite-test
 cd midnite-test
 ```
 
-### **Step 2: Start the Application**
+### **Step 2: Configure Environment Variables**
+
+```bash
+# Copy the example environment file
+cp env.example .env
+
+# Edit the .env file if you want to customize settings (optional)
+# The default values work fine for development
+```
+
+**What this does:**
+
+- Creates a `.env` file with environment variables for Docker Compose
+- Docker Compose automatically reads these variables
+- You can customize database credentials, debug mode, etc. if needed
+
+### **Step 3: Start the Application**
 
 ```bash
 # Start all services (Django + PostgreSQL)
@@ -82,7 +98,7 @@ docker compose up -d
 docker compose ps
 ```
 
-### **Step 3: Set Up Database**
+### **Step 4: Set Up Database**
 
 ```bash
 # Apply database migrations
@@ -92,7 +108,7 @@ docker compose exec web python manage.py migrate
 docker compose exec web python manage.py createsuperuser
 ```
 
-### **Step 4: Create Test Users**
+### **Step 5: Create Test Users**
 
 ```bash
 # Create test users for API testing
@@ -121,7 +137,7 @@ Users created this run: 4
 ✅ Test users created successfully!
 ```
 
-### **Step 5: Test the API**
+### **Step 6: Test the API**
 
 **Basic Test:**
 
@@ -192,16 +208,16 @@ curl -XPOST http://localhost:8000/event/ \
 # Expected: {"error": "Invalid payload", "details": {"t": ["Timestamp 0 must be greater than the latest timestamp X in the system"]}}
 ```
 
-### **Step 6: Access Admin Panel (Optional)**
+### **Step 7: Access Admin Panel (Optional)**
 
 ```bash
 # Open browser and go to:
 http://localhost:8000/admin/
 
-# Login with superuser credentials created in Step 3
+# Login with superuser credentials created in Step 4
 ```
 
-### **Step 7: Run Tests**
+### **Step 8: Run Tests**
 
 ```bash
 # Run comprehensive pytest tests (24 test cases)
@@ -214,7 +230,7 @@ docker compose exec web python test_basic.py
 docker compose exec web ./check_code.sh
 ```
 
-### **Step 8: View Logs**
+### **Step 9: View Logs**
 
 ```bash
 # View application logs
@@ -493,26 +509,94 @@ flake8 events/ midnite_test/ test_basic.py
 
 ## Environment Configuration
 
-The project uses `python-decouple` for secure environment variable management:
+The project uses `python-decouple` for secure environment variable management with Docker Compose integration.
 
-### **Environment Variables**
+### **Environment Variables Setup**
 
-Copy `env.example` to `.env` and configure:
+**Step 1: Create Environment File**
 
 ```bash
+# Copy the example environment file
 cp env.example .env
 ```
 
-**Available Variables:**
+**Step 2: Customize Settings (Optional)**
 
-- `DEBUG`: Enable/disable debug mode
-- `SECRET_KEY`: Django secret key
-- `POSTGRES_*`: Database configuration
-- `LOG_LEVEL`: Logging level (DEBUG, INFO, WARNING, ERROR)
+Edit `.env` file to customize your settings:
 
-### **Docker Environment**
+```bash
+# Django Settings
+DEBUG=True
+SECRET_KEY=your-secret-key-here
 
-Docker Compose automatically uses environment variables with fallback defaults.
+# Database Settings (for Docker Compose)
+POSTGRES_DB=midnite_test
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your-password-here
+POSTGRES_PORT=5433
+
+# Logging Level
+LOG_LEVEL=INFO
+```
+
+**Step 3: Docker Compose Integration**
+
+Docker Compose automatically:
+
+- Reads variables from `.env` file
+- Uses fallback defaults if variables are missing
+- Sets `POSTGRES_HOST=db` automatically for container communication
+
+### **Available Variables**
+
+- `DEBUG`: Enable/disable debug mode (default: True)
+- `SECRET_KEY`: Django secret key (default: provided insecure key)
+- `POSTGRES_DB`: Database name (default: midnite_test)
+- `POSTGRES_USER`: Database user (default: postgres)
+- `POSTGRES_PASSWORD`: Database password (default: postgres)
+- `POSTGRES_PORT`: Database port (default: 5433)
+- `LOG_LEVEL`: Logging level (default: INFO)
+
+### **Port Configuration**
+
+**Default Ports:**
+
+- **Django Web Server**: `8000` (http://localhost:8000)
+- **PostgreSQL Database**: `5433` (changed from 5432 to avoid conflicts)
+
+**Changing Ports:**
+
+If you need to change ports due to conflicts:
+
+**1. Change Database Port:**
+
+```bash
+# Edit .env file
+POSTGRES_PORT=5434  # Use any available port
+```
+
+**2. Change Web Server Port:**
+
+```yaml
+# Edit docker-compose.yml
+services:
+  web:
+    ports:
+      - "8001:8000" # Change 8001 to any available port
+```
+
+**3. Restart Services:**
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+**Common Port Conflicts:**
+
+- **Port 5432**: Often used by local PostgreSQL installations
+- **Port 8000**: Sometimes used by other web services
+- **Solution**: Use ports 5433+ for database, 8001+ for web server
 
 ## Logging
 
@@ -671,8 +755,22 @@ The alert rules are implemented in `events/services.py` using the `AlertRuleEngi
    - Check if ports 8000 and 5432 are available
 
 3. **Migration Errors**:
+
    - Run `python manage.py makemigrations` first
    - Then `python manage.py migrate`
+
+4. **Environment Variable Issues**:
+
+   - **Missing .env file**: Run `cp env.example .env`
+   - **Wrong database host**: Ensure `POSTGRES_HOST=db` in Docker (set automatically)
+   - **Permission errors**: Check file permissions on `.env` file
+   - **Variable not loading**: Restart Docker containers after changing `.env`
+
+5. **Port Conflicts**:
+
+   - **Port 8000 in use**: Change port in `docker-compose.yml` or stop conflicting service
+   - **Port 5433 in use**: Change `POSTGRES_PORT` in `.env` file to another port (e.g., 5434)
+   - **Port 5432 already used locally**: The default is now 5433 to avoid conflicts
 
 ### Debug Mode
 
