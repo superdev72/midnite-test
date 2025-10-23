@@ -629,8 +629,8 @@ The project uses **pytest** for comprehensive testing with **24 test cases** cov
 
 **Test Structure:**
 
-- `events/test_events.py` - Comprehensive pytest test suite
-- `test_basic.py` - Quick functionality verification
+- `events/test_events.py` - Comprehensive pytest test suite (23 tests)
+- `test_basic.py` - Quick functionality verification (1 test)
 - `check_code.sh` - Automated quality checks and testing
 
 ### Alert Rule Implementation
