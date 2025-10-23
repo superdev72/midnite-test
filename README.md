@@ -562,17 +562,23 @@ Docker Compose automatically:
 **Default Ports:**
 
 - **Django Web Server**: `8000` (http://localhost:8000)
-- **PostgreSQL Database**: `5433` (changed from 5432 to avoid conflicts)
+- **PostgreSQL Database**: `5433` (external access from your machine)
+
+**Important Port Explanation:**
+
+- **External Access**: Use port `5433` to connect from your host machine
+- **Internal Docker Communication**: Django connects to database on port `5432` inside the Docker network
+- **Port Mapping**: `5433:5432` means external port 5433 maps to internal port 5432
 
 **Changing Ports:**
 
 If you need to change ports due to conflicts:
 
-**1. Change Database Port:**
+**1. Change Database External Port:**
 
 ```bash
 # Edit .env file
-POSTGRES_PORT=5434  # Use any available port
+POSTGRES_PORT=5434  # Use any available port for external access
 ```
 
 **2. Change Web Server Port:**
@@ -596,7 +602,7 @@ docker compose up -d
 
 - **Port 5432**: Often used by local PostgreSQL installations
 - **Port 8000**: Sometimes used by other web services
-- **Solution**: Use ports 5433+ for database, 8001+ for web server
+- **Solution**: Use ports 5433+ for external database access, 8001+ for web server
 
 ## Logging
 
@@ -770,7 +776,8 @@ The alert rules are implemented in `events/services.py` using the `AlertRuleEngi
 
    - **Port 8000 in use**: Change port in `docker-compose.yml` or stop conflicting service
    - **Port 5433 in use**: Change `POSTGRES_PORT` in `.env` file to another port (e.g., 5434)
-   - **Port 5432 already used locally**: The default is now 5433 to avoid conflicts
+   - **Port 5432 already used locally**: The default external port is now 5433 to avoid conflicts
+   - **Django can't connect to database**: Django connects internally on port 5432, external port is for host access only
 
 ### Debug Mode
 
