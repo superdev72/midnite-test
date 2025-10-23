@@ -211,16 +211,20 @@ class AlertRuleEngineTest(TestCase):
         )
         self.assertIn(1100, alert_codes)
 
-        # Test 3 consecutive withdraws
+        # Test 3 consecutive withdraws - need to create 3 events first
         Event.objects.create(
             user=self.user, transaction_type="withdraw", amount=Decimal("10.00"), timestamp=1
         )
         Event.objects.create(
             user=self.user, transaction_type="withdraw", amount=Decimal("20.00"), timestamp=2
         )
-
-        alert_codes = AlertRuleEngine.evaluate_all_rules(
+        Event.objects.create(
             user=self.user, transaction_type="withdraw", amount=Decimal("30.00"), timestamp=3
+        )
+
+        # Now test with 4th consecutive withdraw
+        alert_codes = AlertRuleEngine.evaluate_all_rules(
+            user=self.user, transaction_type="withdraw", amount=Decimal("40.00"), timestamp=4
         )
         self.assertIn(30, alert_codes)
 

@@ -5,7 +5,6 @@ Run this after starting the Django server.
 """
 
 import os
-import sys
 import time
 import django
 from decimal import Decimal
@@ -25,47 +24,41 @@ def test_basic_functionality():
 
     # Test 1: User model creation
     print("Test 1: User model creation")
-    try:
-        user = User(name="Test User", email="test@example.com")
-        print(f"✅ User created: {user}")
-    except Exception as e:
-        print(f"❌ User creation failed: {e}")
-        return False
+    user = User(name="Test User", email="test@example.com")
+    print(f"✅ User created: {user}")
+    assert user.name == "Test User"
+    assert user.email == "test@example.com"
 
     # Test 2: Event model creation
     print("Test 2: Event model creation")
-    try:
-        current_timestamp = int(time.time())
-        event = Event(
-            user=user,
-            transaction_type="deposit",
-            amount=Decimal("50.00"),
-            timestamp=current_timestamp,
-        )
-        print(f"✅ Event created: {event}")
-    except Exception as e:
-        print(f"❌ Event creation failed: {e}")
-        return False
+    current_timestamp = int(time.time())
+    event = Event(
+        user=user,
+        transaction_type="deposit",
+        amount=Decimal("50.00"),
+        timestamp=current_timestamp,
+    )
+    print(f"✅ Event created: {event}")
+    assert event.user == user
+    assert event.transaction_type == "deposit"
+    assert event.amount == Decimal("50.00")
+    assert event.timestamp == current_timestamp
 
     # Test 3: Alert rule engine
     print("Test 3: Alert rule engine")
-    try:
-        # Test withdraw over 100
-        result = AlertRuleEngine.check_withdraw_over_100(user, Decimal("150.00"))
-        print(f"✅ Withdraw over 100 test: {result}")
+    # Test withdraw over 100
+    result = AlertRuleEngine.check_withdraw_over_100(user, Decimal("150.00"))
+    print(f"✅ Withdraw over 100 test: {result}")
+    assert result is True
 
-        # Test normal amount
-        result = AlertRuleEngine.check_withdraw_over_100(user, Decimal("50.00"))
-        print(f"✅ Normal amount test: {result}")
-
-    except Exception as e:
-        print(f"❌ Alert rule engine test failed: {e}")
-        return False
+    # Test normal amount
+    result = AlertRuleEngine.check_withdraw_over_100(user, Decimal("50.00"))
+    print(f"✅ Normal amount test: {result}")
+    assert result is False
 
     print("✅ All basic functionality tests passed!")
-    return True
 
 
 if __name__ == "__main__":
-    success = test_basic_functionality()
-    sys.exit(0 if success else 1)
+    test_basic_functionality()
+    print("✅ All tests completed successfully!")

@@ -45,8 +45,6 @@ midnite_test/
 ├── check_code.sh            # Code quality script
 ├── create_test_users.py     # User creation script
 ├── test_basic.py            # Basic functionality test
-├── test_comprehensive.py    # Complete API test suite
-├── test_api.py              # Manual test script
 └── manage.py                 # Django management
 ```
 
@@ -206,16 +204,13 @@ http://localhost:8000/admin/
 ### **Step 7: Run Tests**
 
 ```bash
-# Run all tests
-docker compose exec web python -m pytest
+# Run comprehensive pytest tests (24 test cases)
+docker compose exec web python -m pytest events/test_events.py -v
 
 # Run basic functionality test
 docker compose exec web python test_basic.py
 
-# Run comprehensive API test (all alert rules + error cases)
-docker compose exec web python test_comprehensive.py
-
-# Run code quality checks
+# Run all code quality checks and tests
 docker compose exec web ./check_code.sh
 ```
 
@@ -479,14 +474,14 @@ The project includes comprehensive code quality tools:
 
 ```bash
 # Format all Python files
-black events/ midnite_test/ test_api.py
+black events/ midnite_test/ test_basic.py
 ```
 
 ### **Flake8 Linting**
 
 ```bash
 # Check code quality
-flake8 events/ midnite_test/ test_api.py
+flake8 events/ midnite_test/ test_basic.py
 ```
 
 ### **Automated Quality Checks**
@@ -545,7 +540,7 @@ Comprehensive logging is implemented throughout the application:
 ### Run Tests with Docker
 
 ```bash
-docker-compose exec web pytest
+docker compose exec web pytest
 ```
 
 ### Run Tests Locally
@@ -554,7 +549,7 @@ docker-compose exec web pytest
 # Activate virtual environment first
 source venv/bin/activate
 
-# Run all tests
+# Run all tests (24 tests total)
 pytest
 
 # Run with verbose output
@@ -562,6 +557,9 @@ pytest -v
 
 # Run specific test file
 pytest events/test_events.py
+
+# Run basic functionality test
+pytest test_basic.py
 
 # Run with coverage
 pytest --cov=events
@@ -620,6 +618,21 @@ The API returns appropriate HTTP status codes:
 
 ## Development Notes
 
+### Testing Framework
+
+The project uses **pytest** for comprehensive testing with **24 test cases** covering:
+
+- **Model Tests**: User and Event model creation and validation
+- **Service Tests**: All alert rule engine methods
+- **API Tests**: Complete endpoint testing with various scenarios
+- **Error Handling**: Invalid payloads, missing fields, edge cases
+
+**Test Structure:**
+
+- `events/test_events.py` - Comprehensive pytest test suite
+- `test_basic.py` - Quick functionality verification
+- `check_code.sh` - Automated quality checks and testing
+
 ### Alert Rule Implementation
 
 The alert rules are implemented in `events/services.py` using the `AlertRuleEngine` class:
@@ -654,7 +667,7 @@ The alert rules are implemented in `events/services.py` using the `AlertRuleEngi
 
 2. **Docker Issues**:
 
-   - Run `docker-compose down` and `docker-compose up --build`
+   - Run `docker compose down` and `docker compose up --build`
    - Check if ports 8000 and 5432 are available
 
 3. **Migration Errors**:

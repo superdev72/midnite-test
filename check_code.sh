@@ -22,13 +22,23 @@ else
     exit 1
 fi
 
+echo "🧪 Running pytest tests..."
+python -m pytest events/test_events.py -v
+
+if [ $? -eq 0 ]; then
+    echo "✅ All pytest tests passed!"
+else
+    echo "❌ Some pytest tests failed. Please check the output above."
+    exit 1
+fi
+
 echo "🧪 Running basic functionality tests..."
 python test_basic.py
 
 if [ $? -eq 0 ]; then
-    echo "✅ All tests passed!"
+    echo "✅ All basic tests passed!"
 else
-    echo "❌ Some tests failed. Please check the output above."
+    echo "❌ Some basic tests failed. Please check the output above."
     exit 1
 fi
 
